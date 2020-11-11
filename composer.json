@@ -1,0 +1,23 @@
+{
+	"name": "phpgt/async",
+	"description": "Promise-based non-blocking operations.",
+	"license": "MIT",
+
+	"require": {
+		"php": ">=7.4"
+	},
+	"require-dev": {
+		"phpunit/phpunit": "9.*"
+	},
+
+	"autoload": {
+		"psr-4": {
+			"Gt\\Async\\": "./src"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Gt\\Async\\Test\\": "./test/phpunit"
+		}
+	}
+}
