@@ -26,39 +26,11 @@ class Loop {
 	}
 
 	public function run():void {
-		$epochList = [];
-
-		// Create a list of all timers that have a next run time.
-		foreach($this->timerList as $timer) {
-			if($epoch = $timer->getNextRunTime()) {
-				$epochList[] = [$epoch, $timer];
-			}
+		do {
+			$numTriggered = $this->triggerNextTimers();
+			$this->triggerCount += $numTriggered;
 		}
-
-		// If there are no more timers to run, return early.
-		// Returning here ends the recursive call.
-		if(empty($epochList)) {
-			return;
-		}
-
-		// Sort the epoch list so that they are in order of next run time.
-		uasort(
-			$epochList,
-			fn($a, $b) => $a[0] < $b[0] ? -1 : 1
-		);
-
-		// Wait until the first epoch is due, then trigger the timer.
-		$this->waitUntil($epochList[0][0]);
-		$this->trigger($epochList[0][1]);
-
-		// Triggering the timer may have caused time to pass so that
-		// other timers are now due.
-		array_shift($epochList);
-		$this->executeAllReadyTimers($epochList);
-
-		// The recursive call will continue forever until there are
-		// no timers left with a next run time.
-		$this->run();
+		while($numTriggered > 0);
 	}
 
 	public function getTriggerCount():int {
@@ -75,17 +47,57 @@ class Loop {
 		usleep($diff * 1_000_000);
 	}
 
+	private function triggerNextTimers():int {
+		$epochList = [];
+
+// Create a list of all timers that have a next run time.
+		foreach($this->timerList as $timer) {
+			if($epoch = $timer->getNextRunTime()) {
+				$epochList[] = [$epoch, $timer];
+			}
+		}
+
+// If there are no more timers to run, return early.
+		if(empty($epochList)) {
+			return 0;
+		}
+
+// Sort the epoch list so that they are in order of next run time.
+		usort(
+			$epochList,
+			fn($a, $b) => $a[0] < $b[0] ? -1 : 1
+		);
+
+// Wait until the first epoch is due, then trigger the timer.
+		$this->waitUntil($epochList[0][0]);
+		$this->trigger($epochList[0][1]);
+		$triggered = 1;
+
+// Triggering the timer may have caused time to pass so that
+// other timers are now due.
+		array_shift($epochList);
+		$triggered += $this->executeAllReadyTimers($epochList);
+		return $triggered;
+	}
+
 	private function trigger(Timer $timer):void {
 		$timer->tick();
-		$this->triggerCount++;
 	}
 
 	/** @param array[] $epochList [$epoch, $timer] */
-	private function executeAllReadyTimers(array $epochList):void {
+	private function executeAllReadyTimers(array $epochList):int {
+$now = microtime(true);
+		$triggered = 0;
+
 		while(isset($epochList[0])
-		&& $epochList[0][0] <= microtime(true)) {
+		&& $epochList[0][0] <= $now) {
 			$this->trigger($epochList[0][1]);
 			array_shift($epochList);
+			$triggered++;
+
+$now = microtime(true);
 		}
+
+		return $triggered;
 	}
 }
