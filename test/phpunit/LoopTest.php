@@ -51,4 +51,16 @@ class LoopTest extends TestCase {
 
 		self::assertEquals(1, $sut->getTriggerCount());
 	}
+
+	public function testRunWithTimerNoNextRunTime() {
+		$timer = self::createMock(Timer::class);
+		$timer->method("getNextRunTime")
+			->willReturn(null);
+
+		$sut = new Loop();
+		$sut->addTimer($timer);
+		$sut->run();
+
+		self::assertEquals(0, $sut->getTriggerCount());
+	}
 }
