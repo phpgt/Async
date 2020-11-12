@@ -2,28 +2,21 @@
 namespace Gt\Async;
 
 class Loop {
-	private bool $running;
 	/** @var Timer[] */
 	private array $timerList;
+	private int $triggerCount;
 
 	public function __construct() {
-		$this->running = false;
 		$this->timerList = [];
+		$this->triggerCount = 0;
 	}
 
-	public function start():void {
-		$this->running = false;
-
+	public function run():void {
 		foreach($this->timerList as $timer) {
-			$this->running = true;
 		}
 	}
 
-	public function stop():void {
-		$this->running = false;
-	}
-
-	public function isRunning():bool {
-		return $this->running;
+	public function getTriggerCount():int {
+		return $this->triggerCount;
 	}
 }
