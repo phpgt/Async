@@ -10,10 +10,10 @@ class LoopTest extends TestCase {
 		self::assertFalse($sut->isRunning());
 	}
 
-	public function testIsRunningTrueAfterStart() {
+	public function testIsRunningFalseAfterStartWithNoTimer() {
 		$sut = new Loop();
 		$sut->start();
-		self::assertTrue($sut->isRunning());
+		self::assertFalse($sut->isRunning());
 	}
 
 	public function testIsRunningFalseAfterStop() {
