@@ -20,6 +20,7 @@ class Loop {
 	private $sleepFunction;
 	/** @var callable Function that delivers the current time in milliseconds as a float */
 	private $timeFunction;
+	private bool $forever;
 
 	public function __construct() {
 		$this->timerList = [];
@@ -45,11 +46,17 @@ class Loop {
 	}
 
 	public function run(bool $forever = true):void {
+		$this->forever = $forever;
+
 		do {
 			$numTriggered = $this->triggerNextTimers();
 			$this->triggerCount += $numTriggered;
 		}
-		while($numTriggered > 0 && $forever);
+		while($numTriggered > 0 && $this->forever);
+	}
+
+	public function halt():void {
+		$this->forever = false;
 	}
 
 	public function getTriggerCount():int {

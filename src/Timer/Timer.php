@@ -14,7 +14,7 @@ abstract class Timer {
 	/** @var callable[] */
 	protected array $callbackList;
 	/** @var callable Function that delivers the current time in milliseconds as a float */
-	private $timeFunction;
+	protected $timeFunction;
 
 	public function __construct() {
 		$this->triggerTimeQueue = [];

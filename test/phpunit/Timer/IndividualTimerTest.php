@@ -7,39 +7,46 @@ use PHPUnit\Framework\TestCase;
 class IndividualTimerTest extends TestCase {
 	public function testConstructWithFutureTime() {
 		$epoch = microtime(true);
-		$epochPlus50ms = $epoch + 0.05;
-		$sut = new IndividualTimer($epochPlus50ms);
-		self::assertEquals($epochPlus50ms, $sut->getNextRunTime());
+		$epochPlus5s = $epoch + 5;
+		$sut = new IndividualTimer(5);
+		self::assertEquals(
+// The timer must be scheduled within one hundredth of a second of the expectation:
+			round($epochPlus5s, 2),
+			round($sut->getNextRunTime(), 2)
+		);
 	}
 
 	public function testConstructWithPastTime() {
 		$epoch = microtime(true);
-		$epochMinus50ms = $epoch - 0.05;
-		$sut = new IndividualTimer($epochMinus50ms);
-		self::assertEquals($epochMinus50ms, $sut->getNextRunTime());
+		$epochMinus5s = $epoch - 5;
+		$sut = new IndividualTimer(-5);
+		self::assertEquals(
+			round($epochMinus5s, 2),
+			round($sut->getNextRunTime(), 2)
+		);
 	}
 
 	public function testTickWithFutureTime() {
-		$sut = new IndividualTimer(microtime(true) + 1);
+		$sut = new IndividualTimer(100);
 		self::assertFalse($sut->tick());
 	}
 
 	public function testTickWithPastTime() {
-		$sut = new IndividualTimer(microtime(true) - 1);
+		$sut = new IndividualTimer(-100);
 		self::assertTrue($sut->tick());
 	}
 
 	public function testIsScheduledFalseAfterRunning() {
-		$sut = new IndividualTimer(microtime(true));
+		$sut = new IndividualTimer(0);
 		self::assertTrue($sut->isScheduled());
 		$sut->tick();
 		self::assertFalse($sut->isScheduled());
 	}
 
 	public function testIsScheduledTrueAfterRunningMultipleScheduled() {
-		$sut = new IndividualTimer(microtime(true) + 1);
-		$sut->addTriggerTime(microtime(true) + 2);
-		$sut->addTriggerTime(microtime(true) + 3);
+		$sut = new IndividualTimer(1);
+		$sut->addTriggerTime(2);
+		$sut->addTriggerTime(3);
 		self::assertTrue($sut->isScheduled());
 		$sut->tick();
 		$sut->tick();
@@ -51,8 +58,9 @@ class IndividualTimerTest extends TestCase {
 	public function testIsScheduledFalseAfterRunningMultipleScheduledAndTimeAdvances() {
 		$epoch = 1000;
 
-		$sut = new IndividualTimer(1001);
+		$sut = new IndividualTimer();
 		$sut->setTimeFunction(function() use(&$epoch) { return ++$epoch; });
+		$sut->addTriggerTime(1001);
 		$sut->addTriggerTime(1002);
 		$sut->addTriggerTime(1003);
 		self::assertTrue($sut->isScheduled());
@@ -68,9 +76,7 @@ class IndividualTimerTest extends TestCase {
 	public function testAddCallbackNotTriggeredInFuture() {
 		$callbackCount = 0;
 
-		$epoch = 1000;
-		$sut = new IndividualTimer(1001);
-		$sut->setTimeFunction(fn() => $epoch);
+		$sut = new IndividualTimer(1);
 		$sut->addCallback(function() use(&$callbackCount) {
 			$callbackCount++;
 		});
@@ -81,9 +87,7 @@ class IndividualTimerTest extends TestCase {
 	public function testAddCallbackTriggeredInPast() {
 		$callbackCount = 0;
 
-		$epoch = 1000;
-		$sut = new IndividualTimer(999);
-		$sut->setTimeFunction(fn() => $epoch);
+		$sut = new IndividualTimer(0);
 		$sut->addCallback(function() use(&$callbackCount) {
 			$callbackCount++;
 		});
@@ -95,7 +99,8 @@ class IndividualTimerTest extends TestCase {
 		$callbackCount = 0;
 
 		$epoch = 1000;
-		$sut = new IndividualTimer($epoch);
+		$sut = new IndividualTimer();
+		$sut->addTriggerTime($epoch);
 		$sut->addTriggerTime($epoch + 1);
 		$sut->addTriggerTime($epoch + 2);
 		$sut->addTriggerTime($epoch + 5);
