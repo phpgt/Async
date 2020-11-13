@@ -6,11 +6,14 @@
  * with the output to the three trigger times that are added after creating
  * the IndividualTimer object.
  */
+
+use Gt\Async\Loop;
+use Gt\Async\Timer\IndividualTimer;
 require("../vendor/autoload.php");
 
 $timeAtScriptStart = microtime(true);
 
-$timer = new \Gt\Async\Timer\IndividualTimer();
+$timer = new IndividualTimer();
 $timer->addTriggerTime($timeAtScriptStart + 1);
 $timer->addTriggerTime($timeAtScriptStart + 5);
 $timer->addTriggerTime($timeAtScriptStart + 10);
@@ -21,7 +24,7 @@ $timer->addCallback(function() use($timeAtScriptStart) {
 	echo "Number of seconds passed: $secondsPassed", PHP_EOL;
 });
 
-$loop = new \Gt\Async\Loop();
+$loop = new Loop();
 $loop->addTimer($timer);
 echo "Starting...", PHP_EOL;
 $loop->run();
