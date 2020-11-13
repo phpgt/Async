@@ -23,6 +23,10 @@ abstract class Timer {
 //		$this->callbackList[] = $callback;
 //	}
 
+	public function isScheduled():bool {
+		return !empty($this->triggerTimeQueue);
+	}
+
 	public function getNextRunTime():?float {
 		return $this->triggerTimeQueue[0] ?? null;
 	}

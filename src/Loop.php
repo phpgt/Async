@@ -2,6 +2,7 @@
 namespace Gt\Async;
 
 use Gt\Async\Timer\Timer;
+use Gt\Async\Timer\TimerOrder;
 
 /**
  * The core event loop class, used to dispatch all events via different added
@@ -32,12 +33,12 @@ class Loop {
 		$this->sleepFunction = $sleepFunction;
 	}
 
-	public function run():void {
+	public function run(bool $forever = true):void {
 		do {
 			$numTriggered = $this->triggerNextTimers();
 			$this->triggerCount += $numTriggered;
 		}
-		while($numTriggered > 0);
+		while($numTriggered > 0 && $forever);
 	}
 
 	public function getTriggerCount():int {
@@ -57,62 +58,44 @@ class Loop {
 		);
 	}
 
-// TODO: The epochList is a perfect candidate for one of SPL's Iterators.
-// Probably the MultipleIterator...
-	/** @return array[] */
-	public function getTimerOrder():array {
-		$epochList = [];
-
-// Create a list of all timers that have a next run time.
-		foreach($this->timerList as $timer) {
-			if($epoch = $timer->getNextRunTime()) {
-				$epochList[] = [$epoch, $timer];
-			}
-		}
-
-// Sort the epoch list so that they are in order of next run time.
-		usort(
-			$epochList,
-			fn($a, $b) => $a[0] < $b[0] ? -1 : 1
-		);
-
-		return $epochList;
-	}
-
-	/** return array[] */
-	public function getReadyTimers(array $epochList):array {
-		$now = microtime(true);
-		$epochList = array_filter($epochList, fn($a) => $a[0] <= $now);
-		return $epochList;
-	}
+//	/** return array[] */
+//	public function getReadyTimers(array $epochList):array {
+//		$now = microtime(true);
+//		$epochList = array_filter($epochList, fn($a) => $a[0] <= $now);
+//		return $epochList;
+//	}
 
 	private function triggerNextTimers():int {
-		$epochList = $this->getTimerOrder();
+		$timerOrder = new TimerOrder($this->timerList);
+
 // If there are no more timers to run, return early.
-		if(empty($epochList)) {
+		if(count($timerOrder) === 0) {
 			return 0;
 		}
 
 // Wait until the first epoch is due, then trigger the timer.
-		$this->waitUntil($epochList[0][0]);
-		$this->trigger($epochList[0][1]);
+		$this->waitUntil($timerOrder->getCurrentEpoch());
+		$this->trigger($timerOrder->getCurrentTimer());
 
 // Triggering the timer may have caused time to pass so that
 // other timers are now due.
-		array_shift($epochList);
-		$readyList = $this->getReadyTimers($epochList);
-		$this->executeTimers($readyList);
-		return 1 + count($readyList);
+		$timerOrder->next();
+		$timerOrderReady = $timerOrder->subset();
+		$this->executeTimers($timerOrderReady);
+
+// This function will always execute at least 1 timer, it will always wait for
+// the next one to trigger, but could have triggered more during the wait for
+// the first Timer's execution.
+		return 1 + count($timerOrderReady);
 	}
 
 	private function trigger(Timer $timer):void {
 		$timer->tick();
 	}
 
-	/** @param array[] $epochList [$epoch, $timer] */
-	private function executeTimers(array $epochList):void {
-		foreach($epochList as $timerThing) {
-			$this->trigger($timerThing[1]);
+	private function executeTimers(TimerOrder $timerOrder):void {
+		foreach($timerOrder as $item) {
+			$this->trigger($item["timer"]);
 		}
 	}
 }
