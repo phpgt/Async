@@ -156,4 +156,18 @@ class LoopTest extends TestCase {
 		$sut->run();
 		self::assertEquals(10, $tickCount);
 	}
+
+	public function testSleepActuallyDelays() {
+		$startEpoch = microtime(true);
+		$waitUntil = $startEpoch + 0.25;
+
+		$sut = new Loop();
+		$sut->waitUntil($waitUntil);
+		$endEpoch = microtime(true);
+		self::assertEquals(
+// The delay should be accurate to a hundredth of a second.
+			round($waitUntil, 2),
+			round($endEpoch, 2)
+		);
+	}
 }
