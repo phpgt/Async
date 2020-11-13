@@ -9,7 +9,9 @@ namespace Gt\Async\Timer;
  * use of CPU cycles, sleep for the duration until the Timer's next run time.
  */
 abstract class Timer {
+	/** @var float[] */
 	protected array $triggerTimeQueue;
+	/** @var callable[] */
 	protected array $callbackList;
 
 	public function __construct() {
@@ -43,7 +45,7 @@ abstract class Timer {
 			array_shift($this->triggerTimeQueue);
 		}
 		while(isset($this->triggerTimeQueue[0])
-		&& $this->triggerTimeQueue <= $now);
+		&& $this->triggerTimeQueue[0] <= $now);
 
 		return true;
 	}

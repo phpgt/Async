@@ -137,4 +137,52 @@ class LoopTest extends TestCase {
 		self::assertSame($timer2, $timerOrder[0][1]);
 		self::assertSame($timer1, $timerOrder[1][1]);
 	}
+
+	public function testGetTimerListManyReadyManyFuture() {
+		$epoch = microtime(true);
+
+		$timerList = [];
+
+		for($i = 0; $i < 100; $i++) {
+// Offset the epoch by a random amount between -10 and +10 seconds.
+			$rand = rand(-1000, 1000) / 100;
+			$timer = self::createMock(Timer::class);
+			$timer->method("getNextRunTime")
+				->willReturn($epoch + $rand);
+			$timerList[] = $timer;
+		}
+
+		$sut = new Loop();
+		$sut->setSleepFunction(function() {});
+
+		foreach($timerList as $timer) {
+			$sut->addTimer($timer);
+		}
+
+		$timerOrder = $sut->getTimerOrder();
+		$earliest = 0;
+		foreach($timerOrder as $timer) {
+			self::assertGreaterThanOrEqual($earliest, $timer[0]);
+			$earliest = $timer[0];
+		}
+	}
+
+	public function testGetReadyTimers() {
+		$epoch = microtime(true);
+
+		$timerFuture = self::createMock(Timer::class);
+		$timerFuture->method("getNextRunTime")
+			->willReturn($epoch + 100);
+		$timerPast = self::createMock(Timer::class);
+		$timerPast->method("getNextRunTime")
+			->willReturn($epoch - 100);
+		$sut = new Loop();
+		$sut->addTimer($timerFuture);
+		$sut->addTimer($timerPast);
+		$allTimers = $sut->getTimerOrder();
+		$readyTimers = $sut->getReadyTimers($allTimers);
+
+		self::assertCount(1, $readyTimers);
+		self::assertSame($timerPast, $readyTimers[0][1]);
+	}
 }

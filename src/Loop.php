@@ -59,7 +59,8 @@ class Loop {
 
 // TODO: The epochList is a perfect candidate for one of SPL's Iterators.
 // Probably the MultipleIterator...
-	public function getTimerOrder() {
+	/** @return array[] */
+	public function getTimerOrder():array {
 		$epochList = [];
 
 // Create a list of all timers that have a next run time.
@@ -78,6 +79,13 @@ class Loop {
 		return $epochList;
 	}
 
+	/** return array[] */
+	public function getReadyTimers(array $epochList):array {
+		$now = microtime(true);
+		$epochList = array_filter($epochList, fn($a) => $a[0] <= $now);
+		return $epochList;
+	}
+
 	private function triggerNextTimers():int {
 		$epochList = $this->getTimerOrder();
 // If there are no more timers to run, return early.
@@ -88,13 +96,13 @@ class Loop {
 // Wait until the first epoch is due, then trigger the timer.
 		$this->waitUntil($epochList[0][0]);
 		$this->trigger($epochList[0][1]);
-		$triggered = 1;
 
 // Triggering the timer may have caused time to pass so that
 // other timers are now due.
 		array_shift($epochList);
-		$triggered += $this->executeAllReadyTimers($epochList);
-		return $triggered;
+		$readyList = $this->getReadyTimers($epochList);
+		$this->executeTimers($readyList);
+		return 1 + count($readyList);
 	}
 
 	private function trigger(Timer $timer):void {
@@ -102,19 +110,9 @@ class Loop {
 	}
 
 	/** @param array[] $epochList [$epoch, $timer] */
-	private function executeAllReadyTimers(array $epochList):int {
-$now = microtime(true);
-		$triggered = 0;
-
-		while(isset($epochList[0])
-		&& $epochList[0][0] <= $now) {
-			$this->trigger($epochList[0][1]);
-			array_shift($epochList);
-			$triggered++;
-
-$now = microtime(true);
+	private function executeTimers(array $epochList):void {
+		foreach($epochList as $timerThing) {
+			$this->trigger($timerThing[1]);
 		}
-
-		return $triggered;
 	}
 }
