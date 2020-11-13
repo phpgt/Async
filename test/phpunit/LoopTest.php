@@ -34,7 +34,7 @@ class LoopTest extends TestCase {
 		$numCalls = 0;
 
 		$sut = new Loop();
-		$sut->setSleepFunction(function(int $milliseconds) use (&$numCalls) {
+		$sut->setSleepFunction(function() use (&$numCalls) {
 			$numCalls++;
 		});
 
@@ -92,5 +92,49 @@ class LoopTest extends TestCase {
 		$sut->run();
 
 		self::assertEquals(0, $sut->getTriggerCount());
+	}
+
+	public function testGetTimerList() {
+		$epoch = microtime(true);
+
+		$timer1 = self::createMock(Timer::class);
+		$timer1->method("getNextRunTime")
+			->willReturn($epoch + 1, null);
+		$timer2 = self::createMock(Timer::class);
+		$timer2->method("getNextRunTime")
+			->willReturn($epoch + 2, null);
+
+		$sut = new Loop();
+		$sut->setSleepFunction(function() {});
+		$sut->addTimer($timer1);
+		$sut->addTimer($timer2);
+
+		$timerOrder = $sut->getTimerOrder();
+		self::assertSame($timer1, $timerOrder[0][1]);
+		self::assertSame($timer2, $timerOrder[1][1]);
+	}
+
+	/**
+	 * The only difference here to the test above is that timer1 is set to
+	 * be due after timer2, so the order of the timers will be different.
+	 */
+	public function testGetTimerListOutOfOrder() {
+		$epoch = microtime(true);
+
+		$timer1 = self::createMock(Timer::class);
+		$timer1->method("getNextRunTime")
+			->willReturn($epoch + 2, null);
+		$timer2 = self::createMock(Timer::class);
+		$timer2->method("getNextRunTime")
+			->willReturn($epoch + 1, null);
+
+		$sut = new Loop();
+		$sut->setSleepFunction(function() {});
+		$sut->addTimer($timer1);
+		$sut->addTimer($timer2);
+
+		$timerOrder = $sut->getTimerOrder();
+		self::assertSame($timer2, $timerOrder[0][1]);
+		self::assertSame($timer1, $timerOrder[1][1]);
 	}
 }

@@ -17,9 +17,9 @@ abstract class Timer {
 		$this->callbackList = [];
 	}
 
-	public function addCallback(callable $callback):void {
-		$this->callbackList[] = $callback;
-	}
+//	public function addCallback(callable $callback):void {
+//		$this->callbackList[] = $callback;
+//	}
 
 	public function getNextRunTime():?float {
 		return $this->triggerTimeQueue[0] ?? null;

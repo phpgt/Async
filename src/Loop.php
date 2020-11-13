@@ -57,7 +57,9 @@ class Loop {
 		);
 	}
 
-	private function triggerNextTimers():int {
+// TODO: The epochList is a perfect candidate for one of SPL's Iterators.
+// Probably the MultipleIterator...
+	public function getTimerOrder() {
 		$epochList = [];
 
 // Create a list of all timers that have a next run time.
@@ -67,16 +69,21 @@ class Loop {
 			}
 		}
 
-// If there are no more timers to run, return early.
-		if(empty($epochList)) {
-			return 0;
-		}
-
 // Sort the epoch list so that they are in order of next run time.
 		usort(
 			$epochList,
 			fn($a, $b) => $a[0] < $b[0] ? -1 : 1
 		);
+
+		return $epochList;
+	}
+
+	private function triggerNextTimers():int {
+		$epochList = $this->getTimerOrder();
+// If there are no more timers to run, return early.
+		if(empty($epochList)) {
+			return 0;
+		}
 
 // Wait until the first epoch is due, then trigger the timer.
 		$this->waitUntil($epochList[0][0]);

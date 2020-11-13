@@ -2,8 +2,9 @@
 namespace Gt\Async\Test\Timer;
 
 use Gt\Async\Timer\IndividualTimer;
+use PHPUnit\Framework\TestCase;
 
-class IndividualTimerTest extends \PHPUnit\Framework\TestCase {
+class IndividualTimerTest extends TestCase {
 	public function testConstructWithFutureTime() {
 		$epoch = microtime(true);
 		$epochPlus50ms = $epoch + 0.05;
