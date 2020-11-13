@@ -14,20 +14,18 @@ class LoopTest extends TestCase {
 
 	public function testWaitUntil() {
 		$actualDelay = null;
+		$epoch = 1000;
 
 		$sut = new Loop();
+		$sut->setTimeFunction(fn() => $epoch);
 		$sut->setSleepFunction(function(int $milliseconds) use (&$actualDelay) {
 			$actualDelay = $milliseconds;
 		});
 
-		$epoch = microtime(true);
 		$epochPlus5s = $epoch + 5;
 		$sut->waitUntil($epochPlus5s);
-		self::assertEquals(
-			round(5_000_000 / 100),
-// Check that the delayed time is within a threshold of 1/10,000 of a second:
-			round($actualDelay / 100)
-		);
+
+		self::assertEquals($epochPlus5s - $epoch, $actualDelay);
 	}
 
 	public function testWaitUntilNegative() {

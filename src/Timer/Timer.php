@@ -13,15 +13,22 @@ abstract class Timer {
 	protected array $triggerTimeQueue;
 	/** @var callable[] */
 	protected array $callbackList;
+	/** @var callable Function that delivers the current time in milliseconds as a float */
+	private $timeFunction;
 
 	public function __construct() {
 		$this->triggerTimeQueue = [];
 		$this->callbackList = [];
+		$this->timeFunction = fn() => microtime(true);
 	}
 
-//	public function addCallback(callable $callback):void {
-//		$this->callbackList[] = $callback;
-//	}
+	public function setTimeFunction(callable $callable):void {
+		$this->timeFunction = $callable;
+	}
+
+	public function addCallback(callable $callback):void {
+		$this->callbackList[] = $callback;
+	}
 
 	public function isScheduled():bool {
 		return !empty($this->triggerTimeQueue);
@@ -36,7 +43,7 @@ abstract class Timer {
 	 * doesn't occur (is was not due).
 	 */
 	public function tick():bool {
-		$now = microtime(true);
+		$now = call_user_func($this->timeFunction);
 
 		do {
 			$triggerTime = $this->triggerTimeQueue[0] ?? null;

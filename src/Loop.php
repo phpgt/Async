@@ -16,13 +16,20 @@ class Loop {
 	/** @var Timer[] */
 	private array $timerList;
 	private int $triggerCount;
-	/** @var callable Function that delays execution by (int $milliseconds) */
+	/** @var callable Function that delays execution by (float $seconds) */
 	private $sleepFunction;
+	/** @var callable Function that delivers the current time in milliseconds as a float */
+	private $timeFunction;
 
 	public function __construct() {
 		$this->timerList = [];
 		$this->triggerCount = 0;
-		$this->sleepFunction = "usleep";
+		$this->sleepFunction = function(float $seconds):void {
+			usleep((int)($seconds * 1_000_000));
+		};
+		$this->timeFunction = function():float {
+			return microtime(true);
+		};
 	}
 
 	public function addTimer(Timer $timer):void {
@@ -31,6 +38,10 @@ class Loop {
 
 	public function setSleepFunction(callable $sleepFunction):void {
 		$this->sleepFunction = $sleepFunction;
+	}
+
+	public function setTimeFunction(callable $timeFunction):void {
+		$this->timeFunction = $timeFunction;
 	}
 
 	public function run(bool $forever = true):void {
@@ -46,24 +57,14 @@ class Loop {
 	}
 
 	public function waitUntil(float $waitUntilEpoch):void {
-		$epoch = microtime(true);
+		$epoch = call_user_func($this->timeFunction);
 		$diff = $waitUntilEpoch - $epoch;
 		if($diff <= 0) {
 			return;
 		}
 
-		call_user_func(
-			$this->sleepFunction,
-			$diff * 1_000_000
-		);
+		call_user_func($this->sleepFunction, $diff);
 	}
-
-//	/** return array[] */
-//	public function getReadyTimers(array $epochList):array {
-//		$now = microtime(true);
-//		$epochList = array_filter($epochList, fn($a) => $a[0] <= $now);
-//		return $epochList;
-//	}
 
 	private function triggerNextTimers():int {
 		$timerOrder = new TimerOrder($this->timerList);
