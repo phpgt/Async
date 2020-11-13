@@ -2,9 +2,12 @@
 namespace Gt\Async\Timer;
 
 class IndividualTimer extends Timer {
-	public function __construct(float $triggerTime) {
+	public function __construct(float $triggerTime = null) {
 		parent::__construct();
-		$this->addTriggerTime($triggerTime);
+
+		if(!is_null($triggerTime)) {
+			$this->addTriggerTime($triggerTime);
+		}
 	}
 
 	public function addTriggerTime(float $triggerTime):void {
