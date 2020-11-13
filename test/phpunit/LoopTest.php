@@ -130,4 +130,30 @@ class LoopTest extends TestCase {
 
 		self::assertEquals(0, $sut->getTriggerCount());
 	}
+
+	public function testHalt() {
+		$epoch = microtime(true);
+		$tickCount = 0;
+
+		$sut = new Loop();
+
+		$timer = self::createMock(Timer::class);
+		$timer->method("isScheduled")
+			->willReturn(true);
+		$timer->method("getNextRunTime")
+			->willReturn($epoch);
+		$timer->method("tick")
+			->willReturnCallback(function() use($sut, &$tickCount) {
+				$tickCount++;
+
+				if($tickCount === 10) {
+					$sut->halt();
+				}
+				return true;
+			});
+
+		$sut->addTimer($timer);
+		$sut->run();
+		self::assertEquals(10, $tickCount);
+	}
 }
