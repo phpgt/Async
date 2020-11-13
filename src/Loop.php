@@ -15,14 +15,21 @@ class Loop {
 	/** @var Timer[] */
 	private array $timerList;
 	private int $triggerCount;
+	/** @var callable Function that delays execution by (int $milliseconds) */
+	private $sleepFunction;
 
 	public function __construct() {
 		$this->timerList = [];
 		$this->triggerCount = 0;
+		$this->sleepFunction = "usleep";
 	}
 
 	public function addTimer(Timer $timer):void {
 		$this->timerList [] = $timer;
+	}
+
+	public function setSleepFunction(callable $sleepFunction):void {
+		$this->sleepFunction = $sleepFunction;
 	}
 
 	public function run():void {
@@ -44,7 +51,10 @@ class Loop {
 			return;
 		}
 
-		usleep($diff * 1_000_000);
+		call_user_func(
+			$this->sleepFunction,
+			$diff * 1_000_000
+		);
 	}
 
 	private function triggerNextTimers():int {
