@@ -1,6 +1,7 @@
 <?php
 namespace Gt\Async;
 
+use Gt\Async\Promise\Deferred;
 use Gt\Async\Timer\Timer;
 use Gt\Async\Timer\TimerOrder;
 
@@ -21,6 +22,9 @@ class Loop {
 	/** @var callable Function that delivers the current time in milliseconds as a float */
 	private $timeFunction;
 	private bool $forever;
+	private bool $haltWhenAllDeferredComplete;
+	/** @var Deferred[] */
+	private array $activeDeferred;
 
 	public function __construct() {
 		$this->timerList = [];
@@ -31,10 +35,56 @@ class Loop {
 		$this->timeFunction = function():float {
 			return microtime(true);
 		};
+		$this->haltWhenAllDeferredComplete = false;
+		$this->activeDeferred = [];
 	}
 
 	public function addTimer(Timer $timer):void {
 		$this->timerList [] = $timer;
+	}
+
+	public function addDeferredToTimer(
+		Deferred $deferred,
+		Timer $timer = null
+	):void {
+		$timer = $timer ?? $this->timerList[0];
+
+		foreach($deferred->getProcessFunctionArray() as $function) {
+			$timer->addCallback($function);
+		}
+		$timer->addCallback(function() use($deferred, $timer) {
+			if(!$deferred->isActive()) {
+				$this->removeDeferredFromTimer(
+					$deferred,
+					$timer
+				);
+			}
+		});
+
+		$this->activeDeferred[] = $deferred;
+	}
+
+	public function removeDeferredFromTimer(
+		Deferred $deferred,
+		Timer $timer = null
+	):void {
+		$timer = $timer ?? $this->timerList[0];
+
+		foreach($deferred->getProcessFunctionArray() as $function) {
+			$timer->removeCallback($function);
+		}
+		$activeDeferredIndex = array_search(
+			$deferred,
+			$this->activeDeferred
+		);
+		if($activeDeferredIndex !== false) {
+			unset($this->activeDeferred[$activeDeferredIndex]);
+		}
+
+		if($this->haltWhenAllDeferredComplete
+		&& empty($this->activeDeferred)) {
+			$this->halt();
+		}
 	}
 
 	public function setSleepFunction(callable $sleepFunction):void {
@@ -71,6 +121,10 @@ class Loop {
 		}
 
 		call_user_func($this->sleepFunction, $diff);
+	}
+
+	public function haltWhenAllDeferredComplete(bool $halt):void {
+		$this->haltWhenAllDeferredComplete = $halt;
 	}
 
 	private function triggerNextTimers():int {
