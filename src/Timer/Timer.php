@@ -1,8 +1,6 @@
 <?php
 namespace Gt\Async\Timer;
 
-use Gt\Async\Asyncable;
-
 /**
  * Represents one or more trigger times. If the tick function is called when
  * a timer is due, it will execute the timer's callback(s).
@@ -29,11 +27,10 @@ abstract class Timer {
 	}
 
 	public function addCallback(callable $callback):void {
-		$this->callbackList[] = $callback;
+		array_push($this->callbackList, $callback);
 	}
 
 	public function removeCallback(callable $callback):void {
-// TODO: Throw exception if it doesn't exist.
 		$callbackIndex = array_search($callback, $this->callbackList);
 		unset($this->callbackList[$callbackIndex]);
 	}

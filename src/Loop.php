@@ -1,9 +1,9 @@
 <?php
 namespace Gt\Async;
 
-use Gt\Async\Promise\Deferred;
 use Gt\Async\Timer\Timer;
 use Gt\Async\Timer\TimerOrder;
+use Gt\Promise\Deferred;
 
 /**
  * The core event loop class, used to dispatch all events via different added
@@ -25,6 +25,8 @@ class Loop {
 	private bool $haltWhenAllDeferredComplete;
 	/** @var Deferred[] */
 	private array $activeDeferred;
+	/** @var callable[] */
+	private array $haltCallbackList;
 
 	public function __construct() {
 		$this->timerList = [];
@@ -37,6 +39,7 @@ class Loop {
 		};
 		$this->haltWhenAllDeferredComplete = false;
 		$this->activeDeferred = [];
+		$this->haltCallbackList = [];
 	}
 
 	public function addTimer(Timer $timer):void {
@@ -49,20 +52,21 @@ class Loop {
 	):void {
 		$timer = $timer ?? $this->timerList[0];
 
-		foreach($deferred->getProcessFunctionArray() as $function) {
-			$timer->addCallback($function);
-		}
-		$timer->addCallback(function() use($deferred, $timer) {
-			if(!$deferred->isActive()) {
+		$deferred->addCompleteCallback(
+			function() use ($deferred, $timer) {
 				$this->removeDeferredFromTimer(
 					$deferred,
 					$timer
 				);
-			}
-		});
+			});
+
+		foreach($deferred->getProcessList() as $function) {
+			$timer->addCallback($function);
+		}
 
 		$this->activeDeferred[] = $deferred;
 	}
+
 
 	public function removeDeferredFromTimer(
 		Deferred $deferred,
@@ -70,7 +74,7 @@ class Loop {
 	):void {
 		$timer = $timer ?? $this->timerList[0];
 
-		foreach($deferred->getProcessFunctionArray() as $function) {
+		foreach($deferred->getProcessList() as $function) {
 			$timer->removeCallback($function);
 		}
 		$activeDeferredIndex = array_search(
@@ -107,6 +111,20 @@ class Loop {
 
 	public function halt():void {
 		$this->forever = false;
+
+		foreach($this->haltCallbackList as $callback) {
+			call_user_func($callback);
+		}
+	}
+
+	public function haltWhenAllDeferredComplete(
+		bool $shouldHalt = true
+	):void {
+		$this->haltWhenAllDeferredComplete = $shouldHalt;
+	}
+
+	public function addHaltCallback(callable $callback):void {
+		array_push($this->haltCallbackList, $callback);
 	}
 
 	public function getTriggerCount():int {
@@ -121,10 +139,6 @@ class Loop {
 		}
 
 		call_user_func($this->sleepFunction, $diff);
-	}
-
-	public function haltWhenAllDeferredComplete(bool $halt):void {
-		$this->haltWhenAllDeferredComplete = $halt;
 	}
 
 	private function triggerNextTimers():int {

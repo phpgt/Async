@@ -3,7 +3,10 @@ namespace Gt\Async\Test;
 
 use Gt\Async\Loop;
 use Gt\Async\Timer\Timer;
+use Gt\Promise\Deferred;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
 class LoopTest extends TestCase {
 	public function testRunWithNoTimer() {
@@ -169,5 +172,86 @@ class LoopTest extends TestCase {
 			round($waitUntil, 2),
 			round($endEpoch, 2)
 		);
+	}
+
+	public function testAddDeferredToTimerNoTimerPassed() {
+		$callback = function(){};
+
+		$timer = self::createMock(Timer::class);
+		$timer->expects(self::once())
+			->method("addCallback")
+			->with(self::identicalTo($callback));
+
+		$deferred = self::createMock(Deferred::class);
+		$deferred->expects(self::once())
+			->method("getProcessList")
+			->willReturn([$callback]);
+
+		$sut = new Loop();
+		$sut->addTimer($timer);
+		$sut->addDeferredToTimer($deferred);
+	}
+
+	public function testAddDeferredToTimerSpecificTimer() {
+		$callback = function(){};
+
+		$timer1 = self::createMock(Timer::class);
+		$timer1->expects(self::never())
+			->method("addCallback");
+		$timer2 = self::createMock(Timer::class);
+		$timer2->expects(self::once())
+			->method("addCallback")
+			->with(self::identicalTo($callback));
+
+		$deferred = self::createMock(Deferred::class);
+		$deferred->expects(self::once())
+			->method("getProcessList")
+			->willReturn([$callback]);
+
+		$sut = new Loop();
+		$sut->addTimer($timer1);
+		$sut->addTimer($timer2);
+		$sut->addDeferredToTimer($deferred, $timer2);
+	}
+
+	public function testHaltWhenAllDeferredComplete() {
+		$deferredCompleteCallback = null;
+		$deferredProcess = function(){};
+
+		$deferred = self::createMock(Deferred::class);
+		$deferred->expects(self::once())
+			->method("addCompleteCallback")
+			->willReturnCallback(function(callable $cb) use(&$deferredCompleteCallback) {
+				$deferredCompleteCallback = $cb;
+			});
+		$deferred->expects(self::exactly(2))
+			->method("getProcessList")
+			->willReturn([$deferredProcess]);
+
+		$timer = self::createMock(Timer::class);
+		$timer->expects(self::once())
+			->method("addCallback")
+			->with(self::identicalTo($deferredProcess));
+		$timer->expects(self::once())
+			->method("removeCallback")
+			->with(self::identicalTo($deferredProcess));
+
+		/** @var MockObject|callable $haltCallback */
+		$haltCallback = self::getMockBuilder(stdClass::class)
+			->addMethods(["__invoke"])
+			->getMock();
+		$haltCallback->expects(self::once())
+			->method("__invoke");
+
+		$sut = new Loop();
+		$sut->addHaltCallback($haltCallback);
+		$sut->haltWhenAllDeferredComplete();
+		$sut->addTimer($timer);
+		$sut->addDeferredToTimer($deferred, $timer);
+		$sut->run();
+
+// Simulate the Deferred object calling its complete callback:
+		self::assertIsCallable($deferredCompleteCallback);
+		call_user_func($deferredCompleteCallback);
 	}
 }

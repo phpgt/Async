@@ -127,4 +127,25 @@ class IndividualTimerTest extends TestCase {
 		$sut->tick(); // 1006
 		self::assertEquals(4, $callbackCount);
 	}
+
+	public function testRemoveCallback() {
+		$exampleCallbackCount = 0;
+		$exampleCallback = function() use(&$exampleCallbackCount) {
+			$exampleCallbackCount++;
+		};
+
+		$epoch = 1000;
+		$sut = new IndividualTimer();
+		$sut->addTriggerTime($epoch);
+		$sut->addTriggerTime($epoch + 1);
+		$sut->setTimeFunction(function() use(&$epoch) {
+			return $epoch++;
+		});
+
+		$sut->addCallback($exampleCallback);
+		$sut->tick();
+		$sut->removeCallback($exampleCallback);
+		$sut->tick();
+		self::assertEquals(1, $exampleCallbackCount);
+	}
 }
