@@ -3,8 +3,19 @@
 	"description": "Promise-based non-blocking operations.",
 	"license": "MIT",
 
+	"repositories": [
+		{
+			"type": "path",
+			"url": "/home/g105b/Code/PhpGt/Promise",
+			"options": {
+				"symlink": true
+			}
+		}
+	],
+
 	"require": {
-		"php": ">=7.4"
+		"php": ">=7.4",
+		"phpgt/promise": "dev-master"
 	},
 	"require-dev": {
 		"phpunit/phpunit": "9.*",
