@@ -58,6 +58,8 @@ class SlowFileReader {
 		}
 
 		if($this->file->eof()) {
+// When the file reaches the end, this deferred task is finished. We can now
+// resolve the Deferred with the final value.
 			$this->deferred->resolve($this->characterCount);
 			return;
 		}
@@ -88,6 +90,9 @@ $timer->addCallback(function() {
 $loop = new Loop();
 $loop->addTimer($timer);
 $loop->haltWhenAllDeferredComplete(true);
+$loop->addHaltCallback(function() {
+	echo PHP_EOL, "Loop has halted because all Deferred tasks are complete.";
+});
 
 // Create the example classes to slowly loop over the characters of the file.
 $reader1 = new SlowFileReader("example.txt");
@@ -101,17 +106,17 @@ $reader2->setLoop($loop);
 // by the Loop's timers.
 $reader1->countCharacters("aeiou")
 ->then(function(int $numVowels):void {
-	echo "Example text has $numVowels vowels.", PHP_EOL;
+	echo PHP_EOL, "Example text has $numVowels vowels.";
 });
 
 // Another Promise can be added, so their Deferred's work is undertaken
 // concurrently.
 $reader2->countCharacters("bcdfghjklmnpqrstvwxyz")
 ->then(function(int $numConsonants):void {
-	echo "Example text has $numConsonants consonants.", PHP_EOL;
+	echo PHP_EOL, "Example text has $numConsonants consonants.";
 });
 
 // Here we execute the loop, which has been set to halt when all Deferred
 // objects complete.
 $loop->run();
-echo "Complete!", PHP_EOL;
+echo PHP_EOL, "Complete!", PHP_EOL;
