@@ -84,6 +84,10 @@ class Loop {
 		if($activeDeferredIndex !== false) {
 			unset($this->activeDeferred[$activeDeferredIndex]);
 		}
+		if($this->haltWhenAllDeferredComplete
+		&& empty($this->activeDeferred)) {
+			$this->halt();
+		}
 	}
 
 	public function setSleepFunction(callable $sleepFunction):void {
@@ -100,11 +104,6 @@ class Loop {
 		do {
 			$numTriggered = $this->triggerNextTimers();
 			$this->triggerCount += $numTriggered;
-
-			if($this->haltWhenAllDeferredComplete
-				&& empty($this->activeDeferred)) {
-				$this->halt();
-			}
 		}
 		while($numTriggered > 0 && $this->forever);
 	}
