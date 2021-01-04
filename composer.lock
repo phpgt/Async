@@ -4,15 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f28e7379771865872a9dc8ae200398de",
+    "content-hash": "96f7c763d3cc52548f22bed060b10c5c",
     "packages": [
         {
             "name": "phpgt/promise",
             "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PhpGt/Promise.git",
+                "reference": "7e994c8d0267999f266011e0949663f743a5089f"
+            },
             "dist": {
-                "type": "path",
-                "url": "/home/g105b/Code/PhpGt/Promise",
-                "reference": "c274b6891985e7e07cf111eba65a7f1cef05de96"
+                "type": "zip",
+                "url": "https://api.github.com/repos/PhpGt/Promise/zipball/7e994c8d0267999f266011e0949663f743a5089f",
+                "reference": "7e994c8d0267999f266011e0949663f743a5089f",
+                "shasum": ""
             },
             "require": {
                 "php": ">=7.4"
@@ -27,19 +33,18 @@
                     "Gt\\Promise\\": "./src"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Gt\\Promise\\Test\\": "./test/phpunit"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
             "description": "Pleasantly work with asynchronous code.",
-            "transport-options": {
-                "symlink": true,
-                "relative": false
-            }
+            "funding": [
+                {
+                    "url": "https://github.com/phpgt",
+                    "type": "github"
+                }
+            ],
+            "time": "2020-12-23T14:32:37+00:00"
         }
     ],
     "packages-dev": [
