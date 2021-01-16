@@ -26,3 +26,24 @@ This repository provides the concepts of a `Loop`, different `Timer` implementat
 Example usage
 -------------
 
+A loop with three individual timers at 1 second, 5 seconds and 10 seconds.
+
+```php
+$timeAtScriptStart = microtime(true);
+
+$timer = new IndividualTimer();
+$timer->addTriggerTime($timeAtScriptStart + 1);
+$timer->addTriggerTime($timeAtScriptStart + 5);
+$timer->addTriggerTime($timeAtScriptStart + 10);
+
+$timer->addCallback(function() use($timeAtScriptStart) {
+	$now = microtime(true);
+	$secondsPassed = round($now - $timeAtScriptStart);
+	echo "Number of seconds passed: $secondsPassed", PHP_EOL;
+});
+
+$loop = new Loop();
+$loop->addTimer($timer);
+echo "Starting...", PHP_EOL;
+$loop->run();
+```
