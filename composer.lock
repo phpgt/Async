@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "121174b5e642ee10624147a117813eab",
+    "content-hash": "2ea03d5ccf0e3c89907597b9566198d0",
     "packages": [
         {
             "name": "php-http/httplug",
@@ -2284,7 +2284,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.0"
+        "php": ">=7.4"
     },
     "platform-dev": [],
     "plugin-api-version": "1.1.0"
