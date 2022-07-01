@@ -220,7 +220,7 @@ class LoopTest extends TestCase {
 
 		$deferred = self::createMock(Deferred::class);
 		$deferred->expects(self::once())
-			->method("addCompleteCallback")
+			->method("onComplete")
 			->willReturnCallback(function(callable $cb) use(&$deferredCompleteCallback) {
 				$deferredCompleteCallback = $cb;
 			});
