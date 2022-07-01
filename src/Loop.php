@@ -52,7 +52,7 @@ class Loop {
 	):void {
 		$timer = $timer ?? $this->timerList[0];
 
-		$deferred->addCompleteCallback(
+		$deferred->onComplete(
 			function() use ($deferred, $timer) {
 				$this->removeDeferredFromTimer(
 					$deferred,
