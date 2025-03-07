@@ -7,7 +7,7 @@ class IndividualTimer extends Timer {
 	 * that the timer will trigger. To set an absolute time,
 	 * use addTriggerTime().
 	 */
-	public function __construct(float $triggerSeconds = null) {
+	public function __construct(?float $triggerSeconds = null) {
 		parent::__construct();
 
 		if(!is_null($triggerSeconds)) {
