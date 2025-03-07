@@ -13,7 +13,7 @@ class TimerOrder extends MultipleIterator implements Countable {
 	public function __construct(array $timerList) {
 		$timerList = array_filter(
 			$timerList,
-			fn(Timer $t) => $t->isScheduled()
+			fn(Timer $timer) => $timer->isScheduled()
 		);
 		usort(
 			$timerList,
@@ -21,7 +21,7 @@ class TimerOrder extends MultipleIterator implements Countable {
 			$a->getNextRunTime() < $b->getNextRunTime() ? -1 : 1
 		);
 		$epochList = array_map(
-			fn(Timer $t) => $t->getNextRunTime(),
+			fn(Timer $timer) => $timer->getNextRunTime(),
 			$timerList
 		);
 		$this->timerList = $timerList;

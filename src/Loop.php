@@ -48,7 +48,7 @@ class Loop {
 
 	public function addDeferredToTimer(
 		Deferred $deferred,
-		Timer $timer = null
+		?Timer $timer = null
 	):void {
 		$timer = $timer ?? $this->timerList[0];
 
@@ -70,7 +70,7 @@ class Loop {
 
 	public function removeDeferredFromTimer(
 		Deferred $deferred,
-		Timer $timer = null
+		?Timer $timer = null
 	):void {
 		$timer = $timer ?? $this->timerList[0];
 
