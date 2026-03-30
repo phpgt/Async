@@ -46,12 +46,37 @@ class Loop {
 		$this->timerList [] = $timer;
 	}
 
+	/**
+	 * Track a Deferred within the loop lifecycle without attaching its
+	 * process callbacks to a Timer.
+	 *
+	 * This is useful for libraries that manage their own work scheduling but
+	 * still want the loop to halt when all tracked Deferred objects complete.
+	 */
+	public function trackDeferred(Deferred $deferred):void {
+		if($this->isDeferredTracked($deferred)) {
+			return;
+		}
+
+		$deferred->onComplete(
+			function() use ($deferred) {
+				$this->removeDeferred($deferred);
+			});
+
+		$this->activeDeferred[] = $deferred;
+	}
+
+	/**
+	 * @deprecated Prefer trackDeferred() when only completion tracking is
+	 * required. This method remains for Deferred objects whose process
+	 * callbacks should still be attached to a Timer.
+	 */
 	public function addDeferredToTimer(
 		Deferred $deferred,
 		?Timer $timer = null
 	):void {
 		$timer = $timer ?? $this->timerList[0];
-
+		$this->trackDeferred($deferred);
 		$deferred->onComplete(
 			function() use ($deferred, $timer) {
 				$this->removeDeferredFromTimer(
@@ -63,11 +88,13 @@ class Loop {
 		foreach($deferred->getProcessList() as $function) {
 			$timer->addCallback($function);
 		}
-
-		$this->activeDeferred[] = $deferred;
 	}
 
 
+	/**
+	 * @deprecated Prefer removeDeferred() when no Timer callbacks were attached
+	 * by addDeferredToTimer().
+	 */
 	public function removeDeferredFromTimer(
 		Deferred $deferred,
 		?Timer $timer = null
@@ -77,9 +104,14 @@ class Loop {
 		foreach($deferred->getProcessList() as $function) {
 			$timer->removeCallback($function);
 		}
+		$this->removeDeferred($deferred);
+	}
+
+	public function removeDeferred(Deferred $deferred):void {
 		$activeDeferredIndex = array_search(
 			$deferred,
-			$this->activeDeferred
+			$this->activeDeferred,
+			true
 		);
 		if($activeDeferredIndex !== false) {
 			unset($this->activeDeferred[$activeDeferredIndex]);
@@ -172,5 +204,9 @@ class Loop {
 		foreach($timerOrder as $item) {
 			$this->trigger($item["timer"]);
 		}
+	}
+
+	private function isDeferredTracked(Deferred $deferred):bool {
+		return array_search($deferred, $this->activeDeferred, true) !== false;
 	}
 }

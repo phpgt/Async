@@ -214,12 +214,30 @@ class LoopTest extends TestCase {
 		$sut->addDeferredToTimer($deferred, $timer2);
 	}
 
+	public function testTrackDeferredDoesNotAttachTimerCallbacks() {
+		$deferredCompleteCallback = null;
+
+		$deferred = self::createMock(Deferred::class);
+		$deferred->expects(self::once())
+			->method("onComplete")
+			->willReturnCallback(function(callable $cb) use(&$deferredCompleteCallback) {
+				$deferredCompleteCallback = $cb;
+			});
+		$deferred->expects(self::never())
+			->method("getProcessList");
+
+		$sut = new Loop();
+		$sut->trackDeferred($deferred);
+
+		self::assertIsCallable($deferredCompleteCallback);
+	}
+
 	public function testHaltWhenAllDeferredComplete() {
 		$deferredCompleteCallback = null;
 		$deferredProcess = function(){};
 
 		$deferred = self::createMock(Deferred::class);
-		$deferred->expects(self::once())
+		$deferred->expects(self::exactly(2))
 			->method("onComplete")
 			->willReturnCallback(function(callable $cb) use(&$deferredCompleteCallback) {
 				$deferredCompleteCallback = $cb;
@@ -251,6 +269,35 @@ class LoopTest extends TestCase {
 		$sut->run();
 
 // Simulate the Deferred object calling its complete callback:
+		self::assertIsCallable($deferredCompleteCallback);
+		call_user_func($deferredCompleteCallback);
+	}
+
+	public function testHaltWhenTrackedDeferredComplete() {
+		$deferredCompleteCallback = null;
+
+		$deferred = self::createMock(Deferred::class);
+		$deferred->expects(self::once())
+			->method("onComplete")
+			->willReturnCallback(function(callable $cb) use(&$deferredCompleteCallback) {
+				$deferredCompleteCallback = $cb;
+			});
+		$deferred->expects(self::never())
+			->method("getProcessList");
+
+		/** @var MockObject|callable $haltCallback */
+		$haltCallback = self::getMockBuilder(stdClass::class)
+			->addMethods(["__invoke"])
+			->getMock();
+		$haltCallback->expects(self::once())
+			->method("__invoke");
+
+		$sut = new Loop();
+		$sut->addHaltCallback($haltCallback);
+		$sut->haltWhenAllDeferredComplete();
+		$sut->trackDeferred($deferred);
+		$sut->run();
+
 		self::assertIsCallable($deferredCompleteCallback);
 		call_user_func($deferredCompleteCallback);
 	}
