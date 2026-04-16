@@ -1,8 +1,8 @@
 <?php
-namespace Gt\Async;
+namespace GT\Async;
 
-use Gt\Async\Timer\Timer;
-use Gt\Async\Timer\TimerOrder;
+use GT\Async\Timer\Timer;
+use GT\Async\Timer\TimerOrder;
 use Gt\Promise\Deferred;
 
 /**

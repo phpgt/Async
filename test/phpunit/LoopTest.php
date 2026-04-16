@@ -1,8 +1,8 @@
 <?php
-namespace Gt\Async\Test;
+namespace GT\Async\Test;
 
-use Gt\Async\Loop;
-use Gt\Async\Timer\Timer;
+use GT\Async\Loop;
+use GT\Async\Timer\Timer;
 use Gt\Promise\Deferred;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

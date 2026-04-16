@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Async\Event;
+namespace GT\Async\Event;
 
 class EventDispatcher {
 	/** @var array<string, array<int, callable>> */

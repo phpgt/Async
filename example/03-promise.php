@@ -11,8 +11,8 @@
  * framework could offer promise-driven filesystem functionality.
  */
 
-use Gt\Async\Loop;
-use Gt\Async\Timer\PeriodicTimer;
+use GT\Async\Loop;
+use GT\Async\Timer\PeriodicTimer;
 use Gt\Promise\Deferred;
 use Gt\Promise\PromiseInterface;
 

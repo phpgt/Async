@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Async\Timer;
+namespace GT\Async\Timer;
 
 use ArrayIterator;
 use Countable;

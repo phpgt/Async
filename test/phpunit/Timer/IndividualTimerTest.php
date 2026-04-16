@@ -1,7 +1,7 @@
 <?php
-namespace Gt\Async\Test\Timer;
+namespace GT\Async\Test\Timer;
 
-use Gt\Async\Timer\IndividualTimer;
+use GT\Async\Timer\IndividualTimer;
 use PHPUnit\Framework\TestCase;
 
 class IndividualTimerTest extends TestCase {

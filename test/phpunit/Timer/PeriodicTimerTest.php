@@ -1,7 +1,7 @@
 <?php
-namespace Gt\Async\Test\Timer;
+namespace GT\Async\Test\Timer;
 
-use Gt\Async\Timer\PeriodicTimer;
+use GT\Async\Timer\PeriodicTimer;
 use PHPUnit\Framework\TestCase;
 
 class PeriodicTimerTest extends TestCase {

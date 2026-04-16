@@ -9,9 +9,9 @@
  * imagine the concurrent timers being used to execute actual workloads.
  */
 
-use Gt\Async\Loop;
-use Gt\Async\Timer\IndividualTimer;
-use Gt\Async\Timer\PeriodicTimer;
+use GT\Async\Loop;
+use GT\Async\Timer\IndividualTimer;
+use GT\Async\Timer\PeriodicTimer;
 
 require("../vendor/autoload.php");
 

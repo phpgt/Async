@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Async\Timer;
+namespace GT\Async\Timer;
 
 class PeriodicTimer extends Timer {
 	const TRIGGER_POOL_SIZE = 1_000;
