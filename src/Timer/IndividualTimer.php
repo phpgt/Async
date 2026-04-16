@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Async\Timer;
+namespace GT\Async\Timer;
 
 class IndividualTimer extends Timer {
 	/**

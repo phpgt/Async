@@ -7,8 +7,8 @@
  * the IndividualTimer object.
  */
 
-use Gt\Async\Loop;
-use Gt\Async\Timer\IndividualTimer;
+use GT\Async\Loop;
+use GT\Async\Timer\IndividualTimer;
 require("../vendor/autoload.php");
 
 $timeAtScriptStart = microtime(true);

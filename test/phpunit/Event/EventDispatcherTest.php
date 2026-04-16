@@ -1,8 +1,8 @@
 <?php
-namespace Gt\Async\Test\Event;
+namespace GT\Async\Test\Event;
 
-use Gt\Async\Event\Event;
-use Gt\Async\Event\EventDispatcher;
+use GT\Async\Event\Event;
+use GT\Async\Event\EventDispatcher;
 use PHPUnit\Framework\TestCase;
 
 class EventDispatcherTest extends TestCase {

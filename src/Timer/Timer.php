@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Async\Timer;
+namespace GT\Async\Timer;
 
 /**
  * Represents one or more trigger times. If the tick function is called when

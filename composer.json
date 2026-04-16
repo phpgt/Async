@@ -17,11 +17,13 @@
 
 	"autoload": {
 		"psr-4": {
+			"GT\\Async\\": "./src",
 			"Gt\\Async\\": "./src"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
+			"GT\\Async\\Test\\": "./test/phpunit",
 			"Gt\\Async\\Test\\": "./test/phpunit"
 		}
 	},
