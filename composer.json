@@ -6,7 +6,7 @@
 	"require": {
 		"php": ">=8.1",
 		"ext-dom": "*",
-		"phpgt/promise": "^2.0"
+		"phpgt/promise": "^2.4"
 	},
 	"require-dev": {
 		"phpstan/phpstan": "^2.1",

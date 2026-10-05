@@ -3,7 +3,7 @@ namespace GT\Async\Test;
 
 use GT\Async\Loop;
 use GT\Async\Timer\Timer;
-use Gt\Promise\Deferred;
+use GT\Promise\Deferred;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use stdClass;

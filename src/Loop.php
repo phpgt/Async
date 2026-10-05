@@ -3,7 +3,7 @@ namespace GT\Async;
 
 use GT\Async\Timer\Timer;
 use GT\Async\Timer\TimerOrder;
-use Gt\Promise\Deferred;
+use GT\Promise\Deferred;
 
 /**
  * The core event loop class, used to dispatch all events via different added

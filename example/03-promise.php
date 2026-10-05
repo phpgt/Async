@@ -13,8 +13,8 @@
 
 use GT\Async\Loop;
 use GT\Async\Timer\PeriodicTimer;
-use Gt\Promise\Deferred;
-use Gt\Promise\PromiseInterface;
+use GT\Promise\Deferred;
+use GT\Promise\PromiseInterface;
 
 require("../vendor/autoload.php");
 
