@@ -6,24 +6,19 @@ use PHPUnit\Framework\TestCase;
 
 class IndividualTimerTest extends TestCase {
 	public function testConstructWithFutureTime() {
-		$epoch = microtime(true);
-		$epochPlus5s = $epoch + 5;
+		$before = microtime(true) + 5;
 		$sut = new IndividualTimer(5);
-		self::assertEquals(
-// The timer must be scheduled within one hundredth of a second of the expectation:
-			round($epochPlus5s, 2),
-			round($sut->getNextRunTime(), 2)
-		);
+		$after = microtime(true) + 5;
+		self::assertGreaterThanOrEqual($before, $sut->getNextRunTime());
+		self::assertLessThanOrEqual($after, $sut->getNextRunTime());
 	}
 
 	public function testConstructWithPastTime() {
-		$epoch = microtime(true);
-		$epochMinus5s = $epoch - 5;
+		$before = microtime(true) - 5;
 		$sut = new IndividualTimer(-5);
-		self::assertEquals(
-			round($epochMinus5s, 2),
-			round($sut->getNextRunTime(), 2)
-		);
+		$after = microtime(true) - 5;
+		self::assertGreaterThanOrEqual($before, $sut->getNextRunTime());
+		self::assertLessThanOrEqual($after, $sut->getNextRunTime());
 	}
 
 	public function testTickWithFutureTime() {
