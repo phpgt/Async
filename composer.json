@@ -23,8 +23,7 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"GT\\Async\\Test\\": "./test/phpunit",
-			"Gt\\Async\\Test\\": "./test/phpunit"
+			"GT\\Async\\Test\\": "./test/phpunit"
 		}
 	},
 
